@@ -1,0 +1,9 @@
+{
+  "cli": {
+    "metadata": {
+      "command": "ap",
+      "name": "Assemble Project, by Sporniket",
+      "version": "0.0.0-SNAPSHOT"
+    }
+  }
+}

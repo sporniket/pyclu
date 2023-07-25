@@ -1,0 +1,38 @@
+### [project] section: 
+###     see https://peps.python.org/pep-0621/
+### [build-system] section: 
+###     see https://peps.python.org/pep-0517/
+###     see https://peps.python.org/pep-0518/
+### see https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+[build-system]
+requires = ["setuptools>=61", "setuptools-scm>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyclu-by-sporniket"
+#version = "${VERSION}"
+description = "PyCLU by sporniket, python implementation of CLU, the Command-Line Utilities"
+readme = "README.md"
+requires-python = ">=3.8"
+#keywords = ["what","ever"]
+license = {file = "LICENSE"}
+authors = [{name="Sporniket", email="sporniket.studio@gmail.com"}]
+classifiers = [
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
+    "Operating System :: OS Independent",
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+]
+dependencies = [
+    'importlib-metadata; python_version>"3.8"',
+]
+dynamic = ["version"]
+
+[project.urls]
+homepage = "https://github.com/sporniket/pyclu"
+#TODO documentation = "https://readthedocs.org"
+repository = "https://github.com/sporniket/pyclu"
+bug-tracker = "https://github.com/sporniket/pyclu/issues"
