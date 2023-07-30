@@ -35,35 +35,53 @@ from .utils import (
     makeTmpDirOrDie,
     assert_that_source_is_converted_as_expected,
     initializeTmpWorkspace,
+    pathFromFileSpec,
 )
 
 source_dir = os.path.join(".", "tests", "data")
 source_dir_expected = os.path.join(".", "tests", "data.expected")
 
-source_files = ["ap-specs.json"]
+source_files = [{"name": "ap-specs.json"}]
 
-dest_files = ["environment"]
+dest_files = [{"name": "environment"}, {"name": "ap.bash", "target_subdir": "zz_cli"}]
 
 
 def test_that_it_generate_the_environment_file_to_source():
-    tmp_dir = initializeTmpWorkspace(
-        [os.path.join(source_dir, f) for f in source_files]
-    )
-    baseArgs = ["prog"] + [os.path.join(tmp_dir, source) for source in source_files]
+    tmp_dir = initializeTmpWorkspace(source_dir, source_files)
+
+    baseArgs = ["prog"] + [pathFromFileSpec(tmp_dir, source_files[0])]
     with patch.object(sys, "argv", baseArgs):
         with redirect_stdout(io.StringIO()) as out:
             returnCode = PycluCli().run()
         assert returnCode == 0
-        assert (
-            out.getvalue()
-            == f"File '{os.path.join(tmp_dir, source_files[0])}' is deserializable.\n"
-        )
         for f in dest_files:
-            pathActual = os.path.join(tmp_dir, f)
+            f_name = f["name"]
+            pathActual = pathFromFileSpec(tmp_dir, f)
             assert os.path.exists(pathActual) and os.path.isfile(pathActual)
             assert filecmp.cmp(
                 pathActual,
-                os.path.join(source_dir_expected, f),
+                os.path.join(source_dir_expected, f_name),
                 shallow=False,
             )
+        capturedOut = out.getvalue()
+        print(capturedOut)
+        assert capturedOut == f"File '{baseArgs[1]}' is deserializable.\n"
     shutil.rmtree(tmp_dir)
+
+
+def test_that_it_reject_specification_files_without_json_extension():
+    # prepare
+    tmp_dir = makeTmpDirOrDie(time.time())
+    spec_file = os.path.join(tmp_dir, "whatever")
+    with open(spec_file, "w") as outfile:
+        outfile.writelines(["whatever\n"])
+    baseArgs = ["prog", spec_file]
+    with patch.object(sys, "argv", baseArgs):
+        # execute
+        with redirect_stdout(io.StringIO()) as out:
+            returnCode = PycluCli().run()
+        # verify
+        assert returnCode == 1
+        capturedOut = out.getvalue()
+        print(capturedOut)
+        assert capturedOut == f"File '{baseArgs[1]}' is not deserializable.\n"

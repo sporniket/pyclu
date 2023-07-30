@@ -23,9 +23,10 @@ from typing import List
 
 import json
 import os
+from pathlib import Path
 
 
-from .pyclu_types import CluRes, CluResCli, CluResMetadata
+from .pyclu_types import CluRes, CluResCli, CluResMetadata, CluResVariable
 
 
 def createArgParser() -> ArgumentParser:
@@ -72,9 +73,32 @@ class PycluCli:
         s = args.source
         if s.name.endswith(".json"):
             print(f"File '{s.name}' is deserializable.")
+        else:
+            print(f"File '{s.name}' is not deserializable.")
+            return 1
         serialized = "".join(s.readlines())
         clu = self.deserialize(serialized)
         outdir = os.path.dirname(s.name)
+        clu.cli.variables["BASEDIR"] = CluResVariable(
+            "BASEDIR", outdir, actualValue=outdir
+        )
+        for var in clu.cli.variables:
+            clu.cli.variables[var].expand(clu.cli.variables)
+        Path(clu.cli.variables["CLI_DIR"].actualValue).mkdir(
+            parents=True, exist_ok=True
+        )
+        outfile_script_main = os.path.join(
+            clu.cli.variables["CLI_DIR"].actualValue, f"{clu.cli.metadata.command}.bash"
+        )
+        with open(outfile_script_main, "w") as outfile:
+            self.writeLinesWithSeparator(
+                outfile,
+                [
+                    "#!/usr/bin/bash",
+                    "",
+                    f'echo "this will be the command {clu.cli.metadata.name}"',
+                ],
+            )
         outfile_env = os.path.join(outdir, "environment")
         with open(outfile_env, "w") as outfile:
             self.writeLinesWithSeparator(
@@ -82,7 +106,7 @@ class PycluCli:
                 [
                     "#!/usr/bin/bash",
                     "",
-                    f"alias {clu.cli.metadata.command}='echo \"this will be the command {clu.cli.metadata.name}\"'",
+                    f"alias {clu.cli.metadata.command}='{clu.cli.variables['CLI_DIR'].relativeValue}/{clu.cli.metadata.command}.bash'",
                 ],
             )
         # do stuff...
@@ -91,13 +115,18 @@ class PycluCli:
     def deserialize(self, jsonSource: str) -> CluRes:
         tree = json.loads(jsonSource)
         tree_metadata = tree["cli"]["metadata"]
+        tree_vars = {
+            name: CluResVariable(name, tree["cli"]["variables"][name])
+            for name in tree["cli"]["variables"]
+        }
         return CluRes(
             CluResCli(
                 CluResMetadata(
                     tree_metadata["command"],
                     tree_metadata["name"],
                     tree_metadata["version"],
-                )
+                ),
+                tree_vars,
             )
         )
 

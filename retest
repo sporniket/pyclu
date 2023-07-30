@@ -6,7 +6,7 @@ rm -Rf .pytest_cache
 python3 -m black .
 # rebuild, install and test
 python3 -m build && python3 -m pip install --force-reinstall dist/*.whl && \
-python3 -m coverage run --source=pyclu --branch -m pytest -v && \
+python3 -m coverage run --source=pyclu --branch -m pytest -v --show-capture=all && \
 python3 -m coverage report -m && \
 python3 -m coverage html 
 

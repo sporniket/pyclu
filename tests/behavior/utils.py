@@ -39,14 +39,27 @@ def makeTmpDirOrDie(suffix: str = None) -> str:
     return newdir
 
 
-def initializeTmpWorkspace(files: List[str]) -> str:
+def initializeTmpWorkspace(source_dir, files) -> str:
     tmp_dir = makeTmpDirOrDie(time.time())
     for file in files:
-        if file[-2:].upper() == ",A":
-            file = file[:-2]
-        shutil.copy(file, tmp_dir)
+        file_name = file["name"]
+        file_source = os.path.join(source_dir, file_name)
+        target_dir = (
+            os.path.join(tmp_dir, file["target_subdir"])
+            if "target_subdir" in file
+            else tmp_dir
+        )
+        shutil.copy(file_source, target_dir)
     return tmp_dir
 
 
 def assert_that_source_is_converted_as_expected(pathActual: str, pathExpected: str):
     assert filecmp.cmp(pathActual, pathExpected, shallow=False)
+
+
+def pathFromFileSpec(base_dir, file_specs):
+    return (
+        os.path.join(base_dir, file_specs["target_subdir"], file_specs["name"])
+        if "target_subdir" in file_specs
+        else os.path.join(base_dir, file_specs["name"])
+    )

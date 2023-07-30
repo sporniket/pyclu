@@ -1,9 +1,12 @@
 {
-  "cli": {
-    "metadata": {
-      "command": "ap",
-      "name": "Assemble Project, by Sporniket",
-      "version": "0.0.0-SNAPSHOT"
+  "cli":{
+    "metadata":{
+      "command":"ap",
+      "name":"Assemble Project, by Sporniket",
+      "version":"0.0.0-SNAPSHOT"
+    },
+    "variables":{
+      "CLI_DIR":"${BASEDIR}/zz_cli"
     }
   }
 }
