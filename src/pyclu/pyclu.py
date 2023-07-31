@@ -27,6 +27,7 @@ from pathlib import Path
 
 
 from .pyclu_types import CluRes, CluResCli, CluResMetadata, CluResVariable
+from .generators_bash import generateEnvironmentLines
 
 
 def createArgParser() -> ArgumentParser:
@@ -103,11 +104,7 @@ class PycluCli:
         with open(outfile_env, "w") as outfile:
             self.writeLinesWithSeparator(
                 outfile,
-                [
-                    "#!/usr/bin/bash",
-                    "",
-                    f"alias {clu.cli.metadata.command}='{clu.cli.variables['CLI_DIR'].relativeValue}/{clu.cli.metadata.command}.bash'",
-                ],
+                generateEnvironmentLines(clu),
             )
         # do stuff...
         return 0
