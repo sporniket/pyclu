@@ -5,8 +5,15 @@
       "name":"Assemble Project, by Sporniket",
       "version":"0.0.0-SNAPSHOT"
     },
-    "variables":{
-      "CLI_DIR":"${BASEDIR}/zz_cli"
+    "env":{
+      "variables":{
+        "CLI_DATA":"${CLI_DIR}/data",
+        "CLI_DIR":"${BASEDIR}/zz_cli",
+        "TOOLS_DIR":"${BASEDIR}/zz_tools"
+      },
+      "pathes":[
+        "${TOOLS_DIR}/bin"
+      ]
     }
   }
 }

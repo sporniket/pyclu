@@ -22,6 +22,16 @@ from typing import List
 from ..pyclu_types import CluRes
 
 
+def generateExportVariables(context: CluRes) -> str:
+    result = []
+    for v in context.cli.env.orderOfVariables:
+        result += [
+            f"""{v}="$(get_real_path "{context.cli.env.variables[v].relativeValue}")\"""",
+            f"""export {v}""",
+        ]
+    return "\n".join(result)
+
+
 def generateEnvironmentLines(context: CluRes) -> List[str]:
     content = f"""#!/usr/bin/bash
 if [ "${{BASH_SOURCE-}}" = "$0" ]; then
@@ -81,9 +91,10 @@ deactivate () {{
 deactivate nondestructive
 
 # add CLI_DIR into the path
-CLI_DIR="$(get_real_path '{context.cli.variables['CLI_DIR'].relativeValue}')"
+{generateExportVariables(context)}
 _OLD_ENVIRONMENT_PATH="$PATH"
-PATH="${{CLI_DIR}}:${{PATH}}"
+export _OLD_ENVIRONMENT_PATH
+PATH="${{CLI_DIR}}:{":".join(context.cli.env.pathes)}:${{PATH}}"
 export PATH
 
 # remove utility functions

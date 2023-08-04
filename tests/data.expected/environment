@@ -56,9 +56,15 @@ deactivate () {
 deactivate nondestructive
 
 # add CLI_DIR into the path
-CLI_DIR="$(get_real_path './zz_cli')"
+CLI_DIR="$(get_real_path "./zz_cli")"
+export CLI_DIR
+CLI_DATA="$(get_real_path "${CLI_DIR}/data")"
+export CLI_DATA
+TOOLS_DIR="$(get_real_path "./zz_tools")"
+export TOOLS_DIR
 _OLD_ENVIRONMENT_PATH="$PATH"
-PATH="${CLI_DIR}:${PATH}"
+export _OLD_ENVIRONMENT_PATH
+PATH="${CLI_DIR}:${TOOLS_DIR}/bin:${PATH}"
 export PATH
 
 # remove utility functions

@@ -26,7 +26,7 @@ import os
 from pathlib import Path
 
 
-from .pyclu_types import CluRes, CluResCli, CluResMetadata, CluResVariable
+from .pyclu_types import CluRes, CluResCli, CluResMetadata, CluResVariable, CluResEnv
 from .generators_bash import generateEnvironmentLines
 
 
@@ -80,16 +80,17 @@ class PycluCli:
         serialized = "".join(s.readlines())
         clu = self.deserialize(serialized)
         outdir = os.path.dirname(s.name)
-        clu.cli.variables["BASEDIR"] = CluResVariable(
+        clu.cli.env.variables["BASEDIR"] = CluResVariable(
             "BASEDIR", outdir, actualValue=outdir
         )
-        for var in clu.cli.variables:
-            clu.cli.variables[var].expand(clu.cli.variables)
-        Path(clu.cli.variables["CLI_DIR"].actualValue).mkdir(
+        for var in clu.cli.env.variables:
+            clu.cli.env.variables[var].expand(clu.cli.env.variables)
+        Path(clu.cli.env.variables["CLI_DIR"].actualValue).mkdir(
             parents=True, exist_ok=True
         )
         outfile_script_main = os.path.join(
-            clu.cli.variables["CLI_DIR"].actualValue, f"{clu.cli.metadata.command}.bash"
+            clu.cli.env.variables["CLI_DIR"].actualValue,
+            f"{clu.cli.metadata.command}.bash",
         )
         with open(outfile_script_main, "w") as outfile:
             self.writeLinesWithSeparator(
@@ -112,10 +113,12 @@ class PycluCli:
     def deserialize(self, jsonSource: str) -> CluRes:
         tree = json.loads(jsonSource)
         tree_metadata = tree["cli"]["metadata"]
+        tree_env = tree["cli"]["env"]
         tree_vars = {
-            name: CluResVariable(name, tree["cli"]["variables"][name])
-            for name in tree["cli"]["variables"]
+            name: CluResVariable(name, tree_env["variables"][name])
+            for name in tree_env["variables"]
         }
+        list_pathes = [] if tree_env["pathes"] is None else tree_env["pathes"]
         return CluRes(
             CluResCli(
                 CluResMetadata(
@@ -123,7 +126,7 @@ class PycluCli:
                     tree_metadata["name"],
                     tree_metadata["version"],
                 ),
-                tree_vars,
+                CluResEnv(tree_vars, list_pathes),
             )
         )
 

@@ -18,7 +18,8 @@ You should have received a copy of the GNU General Public License along with pyc
 If not, see <https://www.gnu.org/licenses/>. 
 ---
 """
-from typing import Dict
+from typing import Dict, List, Tuple
+import re
 
 
 class CluResMetadata:
@@ -33,12 +34,37 @@ class CluResVariable:
         self.name = name
         self.definition = definition
         self.actualValue = actualValue
+        # all variables SHOULD be expressed as a relative to base directory
+        # BASEDIR = location (dirname) of the spec file
         self.relativeValue = definition.replace("${BASEDIR}", ".")
         self.expanded = False if self.actualValue is None else True
+        self.required = self.computeRequirements()
         # print("new", self.dump())
         # TODO spot '${xxx}' and register 'xxx' as required variable
         # TODO checks whether a list of names contains all of the requirements
         # TODO apply all the required values to the definition to get the actual value
+
+    def computeRequirements(self) -> Tuple[str]:
+        """Compute the list of variables depended upon.
+
+        Except BASEDIR that will be a builtin, this will allow to order the output of variables declarations.
+
+        Returns:
+            Tuple[str]: the list of variables except "BASEDIR" that MUST be declared before this variable
+        """
+        result = ()
+        variableMatcher = re.compile("[$][{]([_0-9A-Za-z]+)[}]")
+        searchFrom = 0
+        while searchFrom < len(self.definition):
+            match = variableMatcher.search(self.definition, searchFrom)
+            if match:
+                found = match.group(1)
+                if found != "BASEDIR":
+                    result += (found,)
+                searchFrom = match.endpos
+            else:
+                searchFrom = len(self.definition)
+        return result
 
     def dump(self) -> str:
         return f"var: '{self.name}':='{self.definition}', expanded:{self.expanded} <- '{self.actualValue}' ; '{self.relativeValue}'"
@@ -60,10 +86,53 @@ class CluResVariable:
         return self.isExpanded()
 
 
-class CluResCli:
-    def __init__(self, metadata: CluResMetadata, variables: Dict[str, CluResVariable]):
-        self.metadata = metadata
+class CluResEnv:
+    def __init__(self, variables: Dict[str, CluResVariable], pathes: List[str]):
         self.variables = variables
+        self.pathes = pathes
+        self.orderOfVariables = self.computeOrderOfVariables()
+
+    def accumulateDependencies(
+        self, known: List[str], requested: str, *, pending: List[str] = []
+    ) -> List[str]:
+        unknown = ()
+        if requested in known:
+            # nothing to do
+            return known
+        elif requested in pending:
+            # cyclic dependency detected, break the cycle
+            return known + [requested]
+        else:
+            subrequest = self.variables[requested].required
+            result = known.copy()
+            for subrequested in subrequest:
+                subpending = (
+                    pending
+                    + [requested]
+                    + [p for p in subrequest if p != subrequested and p not in pending]
+                )
+                result = self.accumulateDependencies(
+                    result, subrequested, pending=subpending
+                )
+            return result if requested in result else result + [requested]
+
+    def computeOrderOfVariables(self) -> List[str]:
+        """Assess the order in which variables SHOULD be declared.
+
+        Returns:
+            List[str]: the ordered list of variables.
+        """
+        result = []
+        for v in self.variables:
+            result = self.accumulateDependencies(result, v)
+
+        return result
+
+
+class CluResCli:
+    def __init__(self, metadata: CluResMetadata, env: CluResEnv):
+        self.metadata = metadata
+        self.env = env
 
 
 class CluRes:
