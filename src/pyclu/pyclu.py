@@ -27,7 +27,7 @@ from pathlib import Path
 
 
 from .pyclu_types import CluRes, CluResCli, CluResMetadata, CluResVariable, CluResEnv
-from .generators_bash import generateEnvironmentLines
+from .generators_bash import generateCliLines, generateEnvironmentLines
 
 
 def createArgParser() -> ArgumentParser:
@@ -95,11 +95,7 @@ class PycluCli:
         with open(outfile_script_main, "w") as outfile:
             self.writeLinesWithSeparator(
                 outfile,
-                [
-                    "#!/usr/bin/bash",
-                    "",
-                    f'echo "this will be the command {clu.cli.metadata.name}"',
-                ],
+                generateCliLines(clu),
             )
         outfile_env = os.path.join(outdir, "environment")
         with open(outfile_env, "w") as outfile:

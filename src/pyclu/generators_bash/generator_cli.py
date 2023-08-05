@@ -18,7 +18,13 @@ You should have received a copy of the GNU General Public License along with pyc
 If not, see <https://www.gnu.org/licenses/>. 
 ---
 """
-from .generator_cli import generateCliLines
-from .generator_environment import generateEnvironmentLines
+from typing import List
+from ..pyclu_types import CluRes
 
-__all__ = ["generateCliLines", "generateEnvironmentLines"]
+
+def generateCliLines(context: CluRes) -> List[str]:
+    content = f"""#!/usr/bin/bash
+
+echo "this will be the command {context.cli.metadata.name}"
+"""
+    return content.splitlines()
