@@ -19,7 +19,7 @@ If not, see <https://www.gnu.org/licenses/>. 
 ---
 """
 from typing import List
-from ..pyclu_types import CluRes
+from ..types import CluRes
 
 
 def generateCliLines(context: CluRes) -> List[str]:

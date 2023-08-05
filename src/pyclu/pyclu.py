@@ -26,7 +26,7 @@ import os
 from pathlib import Path
 
 
-from .pyclu_types import CluRes, CluResCli, CluResMetadata, CluResVariable, CluResEnv
+from .types import CluRes, CluResCli, CluResMetadata, CluResVariable, CluResEnv
 from .generators_bash import generateCliLines, generateEnvironmentLines
 
 
