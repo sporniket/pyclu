@@ -18,6 +18,8 @@ You should have received a copy of the GNU General Public License along with pyc
 If not, see <https://www.gnu.org/licenses/>. 
 ---
 """
-from .types import CluRes, CluResCli, CluResEnv, CluResMetadata, CluResVariable
+from .variable import CluResVariable
+from .environment import CluResEnv
+from .types import CluRes, CluResCli, CluResMetadata
 
 __all__ = ["CluRes", "CluResCli", "CluResEnv", "CluResMetadata", "CluResVariable"]
