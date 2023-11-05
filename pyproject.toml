@@ -5,22 +5,24 @@
 ###     see https://peps.python.org/pep-0518/
 ### see https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
 [build-system]
-requires = ["setuptools>=61", "setuptools-scm>=6.2"]
-build-backend = "setuptools.build_meta"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
 [project]
 name = "pyclu-by-sporniket"
+version = "0.0.1"
 #version = "${VERSION}"
 description = "PyCLU by sporniket, python implementation of CLU, the Command-Line Utilities"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 #keywords = ["what","ever"]
 license = {file = "LICENSE"}
 authors = [{name="Sporniket", email="sporniket.studio@gmail.com"}]
 classifiers = [
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
     "Operating System :: OS Independent",
     "Development Status :: 3 - Alpha",
@@ -29,10 +31,56 @@ classifiers = [
 dependencies = [
     'importlib-metadata; python_version>"3.8"',
 ]
-dynamic = ["version"]
 
 [project.urls]
 homepage = "https://github.com/sporniket/pyclu"
 #TODO documentation = "https://readthedocs.org"
 repository = "https://github.com/sporniket/pyclu"
 bug-tracker = "https://github.com/sporniket/pyclu/issues"
+
+[tool.pdm.scripts]
+_.env_file = ".env.toolchain"
+# --- cleaning
+_clean_tons_of_files = "python3 reclean.py"
+clean = { composite = [ "_clean_tons_of_files" ] }
+# --- linting ---
+_organize_imports = "python3 -m removestar -i ."
+_reformat = "python3 -m black ."
+reformat = { composite = [ "_organize_imports", "_reformat" ] }
+_lint_errors = "python3 -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics"
+_lint_warnings = "python3 -m flake8 . --count --ignore=E266 --exit-zero --max-complexity=10 --max-line-length=127 --statistics"
+lint_report = { composite = [ "_lint_errors", "_lint_warnings" ] }
+lint_ci = { composite = [ "reformat", "_lint_errors" ] }
+lint = { composite = [ "reformat", "lint_report" ] }
+# --- building ---
+_build_only = "python3 -m pdm build"
+_install = "python3 install.py"
+make = { composite = ["_build_only"] }
+make_install = { composite = ["_build_only","_install"] }
+# --- test & coverage ---
+_coverage_pytest = "python3 -m coverage run --source=pyclu --branch -m pytest -v --show-capture=all"
+_coverage_report = "python3 -m coverage report -m"
+_coverage_html = "python3 -m coverage html"
+_ci_only = { composite = ["_coverage_pytest","_coverage_report","_coverage_html"] }
+ci = { composite = ["clean", "lint_ci", "_ci_only"] }
+_pytest = "python3 -m pytest"
+test = { composite = ["clean", "reformat", "pytest"] }
+
+[tool.pdm.dev-dependencies]
+lint = [
+    "black>=23.10.1",
+    "flake8>=6.1.0",
+    "removestar>=1.5",
+]
+ci = [
+    "pytest>=7.4.3",
+    "coverage>=7.3.2",
+]
+scripting = [
+    "rich>=13.6.0",
+]
+build = [
+    "pdm>=2.10.0",
+    "pip>=23.3.1",
+    "twine>=4.0.2",
+]
