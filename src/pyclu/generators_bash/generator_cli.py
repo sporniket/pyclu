@@ -23,8 +23,25 @@ from ..types import CluRes
 
 
 def generateCliLines(context: CluRes) -> List[str]:
-    content = f"""#!/usr/bin/bash
+    content = f"""#!/usr/bin/env bash
 
-echo "this will be the command {context.cli.metadata.name}"
+ap_help() {{
+  cli_name=${{0##*/}}
+  echo -e "
+\e[90m${{cli_name}}\e[0m
+\e[90m---===<{{\e[93m{context.cli.metadata.command}\e[96m, {context.cli.metadata.name} -- version {context.cli.metadata.version}\e[90m}}>===---\e[0m
+
+\e[96mUsage:\e[0m ${{cli_name}} \e[93m[command]\e[0m
+\e[96mCommands:\e[0m
+  \e[93m*\e[0m         Help
+"
+  exit 1
+}}
+
+case "$1" in
+  *)
+    ap_help
+    ;;
+esac
 """
     return content.splitlines()
