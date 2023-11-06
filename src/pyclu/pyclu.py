@@ -26,7 +26,14 @@ import os
 from pathlib import Path
 
 
-from .types import CluRes, CluResCli, CluResMetadata, CluResVariable, CluResEnv
+from .types import (
+    CluRes,
+    CluResCli,
+    CluResMetadata,
+    CluResVariable,
+    CluResEnv,
+    CluResCommand,
+)
 from .generators_bash import generateCliLines, generateEnvironmentLines
 
 
@@ -115,6 +122,13 @@ class PycluCli:
             for name in tree_env["variables"]
         }
         list_pathes = [] if tree_env["pathes"] is None else tree_env["pathes"]
+        tree_commands = (
+            []
+            if "commands" not in tree
+            else []
+            if tree["commands"] is None
+            else [CluResCommand(i["name"], i["help"]) for i in tree["commands"]]
+        )
         return CluRes(
             CluResCli(
                 CluResMetadata(
@@ -123,7 +137,8 @@ class PycluCli:
                     tree_metadata["version"],
                 ),
                 CluResEnv(tree_vars, list_pathes),
-            )
+            ),
+            tree_commands,
         )
 
     def writeLinesWithSeparator(self, out, lines: List[str]):

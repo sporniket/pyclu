@@ -19,7 +19,31 @@ If not, see <https://www.gnu.org/licenses/>. 
 ---
 """
 from typing import List
-from ..types import CluRes
+from ..types import CluRes, CluResCommand
+
+
+def padString(value: str, targetLenght: int) -> str:
+    return (
+        value
+        if len(value) > targetLenght
+        else (value + (" " * targetLenght))[:targetLenght]
+    )
+
+
+def generateHelpLine(commands: List[CluResCommand]) -> str:
+    if len(commands) == 0:
+        return ""
+    columnLength = (max([len(command.name) for command in commands]) + 10) % 8
+    result = ""
+    for line in [
+        f"  \\e[93m{padString(c.name, columnLength)}\\e[0m {c.help}" for c in commands
+    ]:
+        result = (
+            result
+            + """{line}
+"""
+        )
+    return result
 
 
 def generateCliLines(context: CluRes) -> List[str]:
@@ -33,7 +57,7 @@ ap_help() {{
 
 \\e[96mUsage:\\e[0m ${{cli_name}} \\e[93m[command]\\e[0m
 \\e[96mCommands:\\e[0m
-  \\e[93m*\\e[0m         Help
+{generateHelpLine(context.commands)}  \\e[93m*\\e[0m         Help
 "
   exit 1
 }}
