@@ -8,7 +8,13 @@ ap_help() {
 
 \e[96mUsage:\e[0m ${cli_name} \e[93m[command]\e[0m
 \e[96mCommands:\e[0m
-  \e[93m*\e[0m         Help
+  \e[93m install\e[0m Install vasm, Hatari,...
+  \e[93m   setup\e[0m Setup utility.
+  \e[93mscandeps\e[0m Scan source files into makefile dependencies variables.
+  \e[93m   build\e[0m Build utility.
+  \e[93m     run\e[0m Run utility.
+  \e[93m       *\e[0m Help
+
 "
   exit 1
 }

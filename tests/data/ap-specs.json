@@ -15,5 +15,27 @@
         "${TOOLS_DIR}/bin"
       ]
     }
-  }
+  },
+  "commands":[
+    {
+      "name":"install",
+      "help":"Install vasm, Hatari,..."
+    },
+    {
+      "name":"setup",
+      "help":"Setup utility."
+    },
+    {
+      "name":"scandeps",
+      "help":"Scan source files into makefile dependencies variables."
+    },
+    {
+      "name":"build",
+      "help":"Build utility."
+    },
+    {
+      "name":"run",
+      "help":"Run utility."
+    }
+  ]
 }

@@ -20,6 +20,13 @@ If not, see <https://www.gnu.org/licenses/>. 
 """
 from .variable import CluResVariable
 from .environment import CluResEnv
-from .types import CluRes, CluResCli, CluResMetadata
+from .types import CluRes, CluResCli, CluResMetadata, CluResCommand
 
-__all__ = ["CluRes", "CluResCli", "CluResEnv", "CluResMetadata", "CluResVariable"]
+__all__ = [
+    "CluRes",
+    "CluResCli",
+    "CluResEnv",
+    "CluResMetadata",
+    "CluResVariable",
+    "CluResCommand",
+]

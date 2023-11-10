@@ -38,6 +38,13 @@ class CluResCli:
         self.env = env
 
 
+class CluResCommand:
+    def __init__(self, name: str, help: str):
+        self.name = name
+        self.help = help
+
+
 class CluRes:
-    def __init__(self, cli: CluResCli):
+    def __init__(self, cli: CluResCli, commands: List[CluResCommand]):
         self.cli = cli
+        self.commands = commands
